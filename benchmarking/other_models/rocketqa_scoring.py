@@ -18,6 +18,17 @@ def preprocessing(text):
     return text.replace("\n", " ").replace("$","")
 
 def all_ranking_RQA(cross_encoder, q, abstract_l, q_candidates, query_mode):
+    '''
+    Input: 
+        cross_encoder: loaded rocketqa encoder model
+        q: query text
+        abstract_l: list of abstract text for given query
+        q_candidates: list of abstracts ids for given query
+        query_mode: text embedding mode for query text
+    
+    Return:
+        returning ranked_list, ranked_list is a sorted list of the ids corresponds to abstracts
+    '''
     if query_mode == 'paragraph':
         query_l = [q] * len(q_candidates)
         relevance = cross_encoder.matching(query=query_l, para=abstract_l)
@@ -39,6 +50,14 @@ def all_ranking_RQA(cross_encoder, q, abstract_l, q_candidates, query_mode):
 
 
 def all_ranking_result_RQA(dataset, query_mode):
+    '''
+    Input: 
+        dataset: doris mae dataset
+        query_mode: text embedding mode for query text
+    
+    Return:
+          returning rank_dict_list, rank_dict_list is a list of dictionary, the position index corresponds to the number of query, and in each dicitonary, the only key is index_rank, the value is a list of paper abstarct ids sorted in descending order w.r.t. their relevance of the given query, based on the rocketqa model's evaluation. 
+    '''
     cross_encoder = rocketqa.load_model(model="v2_marco_ce", use_cuda=False, device_id=0, batch_size=16)
     query_lists = [q['query_text'] for q in dataset['Query']]
     candidate_list = [q['candidate_pool'] for q in dataset['Query']]

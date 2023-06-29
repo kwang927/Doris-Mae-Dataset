@@ -18,7 +18,17 @@ def preprocessing(text):
     text = re.sub(pattern, '', text)
     return text.replace("\n", " ").replace("$","")
 
-def all_ranking_bm25(bm25, q, abstract_l, q_candidates, query_mode):
+def all_ranking_bm25(bm25, q, q_candidates, query_mode):
+    '''
+    Input: 
+        bm25: loaded bm25 model
+        q: query text
+        q_candidates: list of abstracts ids for given query
+        query_mode: text embedding mode for query text
+    
+    Return:
+        returning ranked_list, ranked_list is a sorted list of the ids corresponds to abstracts
+    '''
     if query_mode == "paragraph":
         query_l = word_tokenize(q)
         similarities = bm25.get_scores(query_l)
@@ -37,6 +47,14 @@ def all_ranking_bm25(bm25, q, abstract_l, q_candidates, query_mode):
     return ranked_list
 
 def all_ranking_result_bm25(dataset, query_mode):
+    '''
+    Input: 
+        dataset: doris mae dataset
+        query_mode: text embedding mode for query text
+    
+    Return:
+          returning rank_dict_list, rank_dict_list is a list of dictionary, the position index corresponds to the number of query, and in each dicitonary, the only key is index_rank, the value is a list of paper abstarct ids sorted in descending order w.r.t. their relevance of the given query, based on the bm25 model's evaluation. 
+    '''
     query_lists = [q['query_text'] for q in dataset['Query']]
     candidate_list = [q['candidate_pool'] for q in dataset['Query']]
     rank_dict_list = []
@@ -48,7 +66,7 @@ def all_ranking_result_bm25(dataset, query_mode):
         abs_list = [preprocessing(abstracts[idx]['original_abstract']) for idx in q_candidates]
         tokenized_abstract = [word_tokenize(doc) for doc in abs_list]
         bm25_abs = BM25Okapi(tokenized_abstract)
-        ranked_list = all_ranking_bm25(bm25_abs, q, abs_list, q_candidates, query_mode)
+        ranked_list = all_ranking_bm25(bm25_abs, q, q_candidates, query_mode)
         rank_dict['index_rank'] = ranked_list
         rank_dict_list.append(rank_dict)
         
