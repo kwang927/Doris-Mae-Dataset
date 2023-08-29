@@ -11,6 +11,8 @@ from tqdm import tqdm
 from nltk import word_tokenize, sent_tokenize
 from transformers import AutoTokenizer, AutoModel, AutoModelForMaskedLM
 from sentence_transformers import SentenceTransformer, util
+from torch import Tensor
+import torch.nn.functional as F
 
 
 '''
@@ -39,6 +41,11 @@ def preprocessing(text):
     pattern = r"(((https?|ftp)://)|(www.))[^\s/$.?#].[^\s]*"
     text = re.sub(pattern, '', text)
     return text.replace("\n", " ").replace("$","")
+
+def average_pool(last_hidden_states: Tensor,
+                 attention_mask: Tensor) -> Tensor:
+    last_hidden = last_hidden_states.masked_fill(~attention_mask[..., None].bool(), 0.0)
+    return last_hidden.sum(dim=1) / attention_mask.sum(dim=1)[..., None]
 
 def load_model(model_name, cuda =None):
     """
@@ -80,6 +87,20 @@ def load_model(model_name, cuda =None):
         tokenizer = None
         if cuda!= "cpu": 
             cuda = cuda.split(",")[0]
+    elif model_name == "e5":
+        tokenizer = AutoTokenizer.from_pretrained('intfloat/e5-large-v2')
+        model = AutoModel.from_pretrained('intfloat/e5-large-v2')
+        model.eval()
+    elif model_name == "specterv2":
+        tokenizer = AutoTokenizer.from_pretrained('allenai/specter2_base')
+        model = AutoModel.from_pretrained('allenai/specter2_base')
+        model.load_adapter("allenai/specter2", source="hf", load_as="specter2", set_active=True)
+    elif model_name == "simcse":
+        tokenizer = AutoTokenizer.from_pretrained("princeton-nlp/sup-simcse-bert-base-uncased")
+        model = AutoModel.from_pretrained("princeton-nlp/sup-simcse-bert-base-uncased")
+    elif model_name == "scibertID":
+        tokenizer = AutoTokenizer.from_pretrained('allenai/scibert_scivocab_uncased')
+        model = AutoModel.from_pretrained('checkpoint-91683')
         
 
     if cuda!= "cpu":
@@ -143,6 +164,7 @@ def optimal_batch_size(model_name, model, tokenizer, text, cuda_num, cuda, bs):
             else:
                 raise RuntimeError("Other issues in the model implementation")
     raise ValueError("Cuda memory does not support batch processing")
+    
 def get_embedding(model_name, model, tokenizer, text, cuda= "cpu", batch_size= 30):
     """
     Input model: loaded model
@@ -188,7 +210,7 @@ def tokenization(model_name, tokenizer, text):
     '''
     if model_name in ["sentbert", "ance"]:
         return text
-    elif model_name in ["ernie", "simlm", "spladev2", "scibert", "colbertv2"]:
+    elif model_name in ["ernie", "simlm", "spladev2", "scibert", "colbertv2", "specterv2", "e5", "simcse", "scibertID"]:
         inputs = tokenizer(text, padding=True, truncation=True, max_length=1000, return_tensors="pt")
     elif model_name in ["ot_aspire", "ts_aspire"]:
         ret = [{'TITLE': " ", 'ABSTRACT': sent_tokenize(i)} for i in text]
@@ -209,14 +231,14 @@ def encoding(model_name, model, inputs, cuda):
     else:
         device = "cpu"
     with torch.no_grad():
-        if model_name in ["ernie", "scibert"]:
+        if model_name in ["ernie", "scibert", "simcse", "scibertID"]:
             input_ids =inputs['input_ids'].to(device)
             attention_mask = inputs['attention_mask'].to(device)
             embeddings = model(input_ids, attention_mask = attention_mask)
             output = embeddings.pooler_output.detach().cpu()
             del input_ids, attention_mask, embeddings
             torch.cuda.empty_cache()
-        elif model_name == "simlm":
+        elif model_name in ["simlm", "specterv2"]:
             input_ids =inputs['input_ids'].to(device)
             attention_mask = inputs['attention_mask'].to(device)
             embeddings = model(input_ids, attention_mask = attention_mask)
@@ -251,6 +273,26 @@ def encoding(model_name, model, inputs, cuda):
             del embeddings
             torch.cuda.empty_cache()
             return output
+        elif model_name == "e5":
+            input_ids = inputs['input_ids'].to(device)
+            assert input_ids.shape[1]<=512
+            token_type_ids = inputs['token_type_ids'].to("cuda")
+            attention_mask = inputs['attention_mask'].to("cuda")
+
+            new_batch_dict={}
+            new_batch_dict["input_ids"] = input_ids
+            new_batch_dict["token_type_ids"] = token_type_ids
+            new_batch_dict["attention_mask"] = attention_mask
+
+            outputs = model(**new_batch_dict)
+            embeddings = average_pool(outputs.last_hidden_state, new_batch_dict['attention_mask'])
+            embeddings = F.normalize(embeddings, p=2, dim=1)
+   
+            output = embeddings.detach().cpu()
+    
+            del input_ids, token_type_ids, attention_mask, new_batch_dict, outputs, embeddings
+            torch.cuda.empty_cache()
+            
     return output.numpy()
 
 
@@ -270,7 +312,3 @@ def pre_encoding_by_mode(text, mode = "paragraph"):
         return ret
     else:
         raise ValueError("only supports paragraph or sentence processing modes")
-    
-
-    
-    
