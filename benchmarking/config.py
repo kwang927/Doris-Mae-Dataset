@@ -18,32 +18,32 @@ def print_config(config):
 def create_config(option, cuda, bs):
     model_name_dict =  {}
     if option == "query":
-        model_names = ["ada", "e5", "llama", "ts_aspire", "ot_aspire", "specter", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "scibert", "ernie","bm25", "tfidf"]
+        model_names = ["ada", "e5", "llama", "ts_aspire", "ot_aspire", "specter", "specterv2", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "scibert", "ernie","bm25", "tfidf", "simcse"]
     elif "subquery" in option:
         if int(option.split("_")[-1])==2:
-            model_names = ["ts_aspire", "ot_aspire", "specter", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "ernie","scibert","bm25", "tfidf"]
+            model_names = ["ada", "llama", "e5", "ts_aspire", "ot_aspire", "specter", "specterv2", "specter-ID", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "ernie","scibert", "scibertID", "bm25", "tfidf", "simcse"]
         else:
             model_names = ["ts_aspire", "ot_aspire",  "sentbert",  "ance", "simlm", "spladev2", "colbertv2", "ernie","scibert"]
     elif option == "aspect":
-        model_names = ["ada", "ts_aspire", "ot_aspire", "specter", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "ernie","scibert","bm25", "tfidf"]
-        
+        model_names = ["ada", "e5", "ts_aspire", "ot_aspire", "specter", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "ernie","scibert","bm25", "tfidf", "scibertID", "simcse"]
+   
     for model in model_names:
         model_name_dict[model] = {}
     for model in model_names:  # abstract mode creation 
-        if model not in [ "sentbert", "ance"]:
+        if model not in ["sentbert", "ance"]:
             model_name_dict[model]["abstract_mode"] = "paragraph"
-        elif model in [ "sentbert", "ance"]:
+        elif model in ["sentbert", "ance"]:
             model_name_dict[model]["abstract_mode"] = "sentence"
     for model in model_names:  # query mode creation , note "ernie", "scibert", "simlm", "spladev2", "colbertv2" could have sentence as query mode if desired. 
-        if model not in [ "sentbert", "ance"]:
+        if model not in ["sentbert", "ance"]:
             model_name_dict[model]["query_mode"] = "paragraph"
-        elif model in [ "sentbert", "ance"]:
+        elif model in ["sentbert", "ance"]:
             model_name_dict[model]["query_mode"] = "sentence"
 
     for model in model_names:  # metric creation 
-        if model not in [ "specter", "ts_aspire", "ot_aspire"]:
+        if model not in [ "specter", "ts_aspire", "ot_aspire", "specterv2", "specter-ID"]:
             model_name_dict[model]["metric"] = "cosine"
-        elif model in [ "specter", "ts_aspire"]:
+        elif model in [ "specter", "ts_aspire", "specterv2", "specter-ID"]:
             model_name_dict[model]["metric"] =  "l2"
         elif model in ["ot_aspire"]:
             model_name_dict[model]["metric"] = "ot"
