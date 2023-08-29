@@ -113,7 +113,7 @@ def get_text_list(dataset):
           candidate_pool_list: list of candidate pool, where each candidate pool is a list of abstracts in string
           candidate_pool_id_list: list of candidate pool id, where each is a list of ids, each id is the paper id in dataset.
     '''
-    removed_list = [205580, 346695, 346826, 346836]
+    removed_list = [205580, 346695, 346826, 346836, 28674]
     
     Query = dataset['Query']
     query_list, query_id_list, candidate_pool_list, candidate_pool_id_list =[], [], [], []
@@ -125,8 +125,7 @@ def get_text_list(dataset):
     return query_list, query_id_list, candidate_pool_list, candidate_pool_id_list
         
 
-
-def rank_by_model(dataset, model_name, config):
+def rank_by_model(dataset, model_name, config, e5v3_path=None):
     '''
     Input: 
            dataset: doris mae dataset
@@ -151,19 +150,20 @@ def rank_by_model(dataset, model_name, config):
         print(f"ranking results for {model_name} are already calculated")
         return rank
     
-    elif model_name in ["rocketqa", "tfidf", "bm25"]:
+    elif model_name in ["rocketqa", "tfidf", "bm25", "GPT4", "GPT3.5"]:
         if model_name == "rocketqa":
-            rank = all_ranking_result_RQA(dataset, query_mode)
+            rank = all_ranking_result_RQA(dataset, abstract_mode, query_mode)
         elif model_name == "tfidf":
             rank = all_ranking_result_tfidf(dataset, query_mode)
         elif model_name == "bm25":
             rank = all_ranking_result_bm25(dataset, query_mode)
+            
         with open(f"{rank_result_path}/{level}/ranking_{model_name}_abstract-{abstract_mode}_query-{query_mode}_{aggregation}.pickle", "wb") as f:
             pickle.dump(rank, f)
         return rank
 
     
-    elif model_name in ["specter", "ada", "llama", "e5"]:
+    elif model_name in ["specter", "ada", "llama", "specter-ID"]:
         with open(f"{embedding_result_path}/{level}/embedding_{model_name}_abstract-{abstract_mode}_query-{query_mode}_{aggregation}.pickle", "rb") as f:
             embedding_dict = pickle.load(f)
             print(f"embedding for {model_name} is already calculated")
@@ -180,14 +180,19 @@ def rank_by_model(dataset, model_name, config):
         else:
               
             abstract_list = list(set(list(chain.from_iterable(candidate_pool_list))))
-
+            
             pre_encoded_abstract = pre_encoding_by_mode(abstract_list, mode = config['model_name_dict'][model_name]['abstract_mode'])
             pre_encoded_query = pre_encoding_by_mode(query_list, mode = config['model_name_dict'][model_name]['query_mode'])
+                
 
             pre_encoded_text = pre_encoded_abstract + pre_encoded_query
             
             print(f"loading model: {model_name}....")
-            model, tokenizer = load_model(model_name, config['cuda'])
+            if "e5v" in model_name:
+              
+                model, tokenizer = load_model(model_name, config['cuda'], e5v3_path)
+            else:
+                model, tokenizer = load_model(model_name, config['cuda'])
             embedding_dict = get_embedding(model_name, model, tokenizer, pre_encoded_text, config['cuda'], config['bs'])
             
             with open(f"{embedding_result_path}/{level}/embedding_{model_name}_abstract-{abstract_mode}_query-{query_mode}_{aggregation}.pickle", "wb") as f:
@@ -195,10 +200,12 @@ def rank_by_model(dataset, model_name, config):
     
     score_dict_list= get_relevance_score_for_all(model_name, query_list, query_id_list, candidate_pool_list, candidate_pool_id_list, embedding_dict, config)
     rank =[]
+    scores_rank = []
     for score_dict in score_dict_list:
         sorted_list = sorted(score_dict.items(), key = lambda x: x[1], reverse = True)
         tmp_rank = {"index_rank": [s[0] for s in sorted_list]}
         rank.append(tmp_rank)
+        scores_rank.append(sorted_list)
     
     with open(f"{rank_result_path}/{level}/ranking_{model_name}_abstract-{abstract_mode}_query-{query_mode}_{aggregation}.pickle", "wb") as f:
         pickle.dump(rank, f)   
