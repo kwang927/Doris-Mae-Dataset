@@ -48,11 +48,11 @@ cd ..
 To reproduce the experiments detailed in the DORIS-MAE paper, please utilize `evluation.py`.
 ```bash
 cd benchmarking
-python3 evaluation.py -o <query_option>[query/subquery/aspect] -c <cuda_option> -b <batch_size>
+python3 evaluation.py -o <query_option>[query/subquery/aspect] -c <cuda_option> -b <batch_size> -bt <bootstrap_option>
 ```
 For instance, to reproduce the experiments detailed for whole uery level retreival, you can use the line provided below:
 ```bash
-python3 evaluation.py -o "query" -c "0,1,2" -b 200
+python3 evaluation.py -o "query" -c "0,1,2" -b 200 -bt True
 ```
 To reproduce the experiments with different abstract and query embedding levels, you can edit abstract mode by modifying the 33th and 35th lines, and edit query mode by modifying the 38th and 40th lines in `config.py`.
 
@@ -96,6 +96,32 @@ To augment the dataset, please follow the steps below:
 2. Identify the corpus and corresponding candidate pool for every query.
 3. Execute the GPT annotation program.
 4. Run the evaluation program.
+
+
+### Creating New Candidate Pools
+
+To generate new candidate pools for the augmented dataset, utilize the `create_candidate_pool.py` script. It's important to ensure that the `ada-002` embedding for the queries is present in the candidate pool for this script to function correctly. However, even if you decide to construct the candidate pool differently, the other functionalities of this repository will remain operational.
+
+**Steps to Create the Candidate Pool:**
+
+1. Navigate to the directory:
+```
+   cd create_candidate_pool
+```
+
+2. Run the script:
+```
+python3 create_candidate_pool.py -o <output_dir> -q <path_to_the_dataset> -a <path_to_the_ada_embedding>
+```
+
+**Example:**
+```
+python3 create_candidate_pool.py -o candidate_pool_example -q ../benchmarking/dataset/DORIS-MAE_dataset_v1.json -a ../../benchmarking/dataset/ada_embedding_for_DORIS-MAE_v1.pickle
+```
+
+The program is expected to take approximately 90 minutes for a dataset consisting of 50 queries and a 360k corpus. The resulting candidate pool will be saved in the specified `<output_dir>` with the filename `candidate_pool.pickle`.
+
+
 
 ## License
 
