@@ -16,7 +16,7 @@
 
 ## Dataset
 
-Welcome to the official repository for the DORIS-MAE project. The dataset associated with this project can be found [here](https://doi.org/10.5281/zenodo.8035110), released under a CC-BY-NC license.
+Welcome to the official repository for the DORIS-MAE project. The dataset associated with this project can be found [here](https://doi.org/10.5281/zenodo.8299749), released under a CC-BY-NC license.
 
 In scientific research, the ability to effectively retrieve relevant documents based on complex, multifaceted queries is critical. Existing evaluation datasets for this task are limited, primarily due to the high costs of annotating resources that capture complex queries.
 
