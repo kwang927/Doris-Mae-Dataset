@@ -70,6 +70,7 @@ To annotate the question pairs, execute the following lines:
 python3 run_annotation.py -m create -d <path_to_the_dataset> -s <annotation_dir> -t 100
 cd <annotation_dir>
 bash annotation.sh
+cd -
 python3 run_annotation.py -m collect -c <annotation_dir> -o <annotation_result_file>
 ```
 
