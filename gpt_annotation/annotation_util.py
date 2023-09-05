@@ -33,13 +33,13 @@ def create_question_pair_set_and_shell_for_annotation(data, num_of_threads, outp
 
 echo "shell starting ..."
 
-# Loop variables start from 0 to {full_length} with step {step_size}
-for ((i=0; i<={full_length}; i+=100))
+# Loop variables start from 0 to {full_length} with step {num_of_threads}
+for ((i=0; i<={full_length}; i+={num_of_threads}))
 do
     echo "sleeping 30s, the program is running normally"
     sleep 30s
     start=$i
-    end=$((i+100))
+    end=$((i+{num_of_threads}))
 
     # Run the command with a 2-minute timeout
     if ! timeout 3m python ../GPT_annotation.py -q question_pairs.pickle -o annotations -p ../prompt_config/prompt_config.pickle -c ht -t {num_of_threads} -s $start -e $end
