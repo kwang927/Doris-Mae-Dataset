@@ -17,15 +17,20 @@ def print_config(config):
           
 def create_config(option, cuda, bs):
     model_name_dict =  {}
+    # For all options below, there are ada and llama model options, they can be added by providing pickle files following specific format
     if option == "query":
-        model_names = ["ada", "e5", "llama", "ts_aspire", "ot_aspire", "specter", "specterv2", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "scibert", "ernie","bm25", "tfidf", "simcse"]
+        model_names = ["e5", "ts_aspire", "ot_aspire", "simcse", "specter", "specterv2", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "scibert", "ernie","bm25", "tfidf"]
     elif "subquery" in option:
         if int(option.split("_")[-1])==2:
-            model_names = ["ada", "llama", "e5", "ts_aspire", "ot_aspire", "specter", "specterv2", "specter-ID", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "ernie","scibert", "scibertID", "bm25", "tfidf", "simcse"]
+            model_names = ["e5", "ts_aspire", "ot_aspire", "simcse", "specter", "specterv2", "specter-ID", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "ernie","scibert", "scibertID", "bm25", "tfidf"]
         else:
-            model_names = ["ts_aspire", "ot_aspire",  "sentbert",  "ance", "simlm", "spladev2", "colbertv2", "ernie","scibert"]
+            model_names = ["e5", "ts_aspire", "ot_aspire", "simcse", "specterv2", "sentbert",  "ance", "simlm", "spladev2", "colbertv2", "ernie", "scibert"]
     elif option == "aspect":
-        model_names = ["ada", "e5", "ts_aspire", "ot_aspire", "specter", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "ernie","scibert","bm25", "tfidf", "scibertID", "simcse"]
+        model_names = ["e5", "ts_aspire", "ot_aspire", "simcse", "specter", "specterv2", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "ernie","scibert","bm25", "tfidf", "scibertID"]
+    elif option == "60_query":
+        model_names = ["e5", "ts_aspire", "ot_aspire", "simcse", "specter", "specterv2", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "ernie","scibert","bm25", "tfidf"]
+    elif option == "query_candidate_150":
+        model_names = ["e5", "ts_aspire", "ot_aspire", "simcse", "specter", "specterv2", "sentbert", "rocketqa", "ance", "simlm", "spladev2", "colbertv2", "ernie","scibert","bm25", "tfidf"]
    
     for model in model_names:
         model_name_dict[model] = {}
