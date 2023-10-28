@@ -290,59 +290,6 @@ def create_individual_aspect_dataset(data):
         
     return new_data
 
-
-# def create_10_candidate_dataset(data):
-    
-#     random.seed(42)
-#     gpt_result = compute_all_gpt_score(data)
-#     sorted_gpt_result = []
-#     get_candidate_pool_list = []
-#     for each_dict in gpt_result:
-#         sorted_dict = dict(sorted(each_dict.items(), key=lambda x: x[1][1], reverse = True))
-#         relavance_abs = [each for each in sorted_dict.items() if each[1][1] >= 1]
-#         candidate_pool_dict = {}
-#         if len(relavance_abs) >= 3:
-#             non_rel_abs = [each for each in sorted_dict.items() if each[1][1] < 1]
-#             random_rel = random.sample(relavance_abs, 3)
-#             sorted_random_rel = sorted(random_rel, key=lambda x: x[1][1], reverse = True)
-#             random_non_rel = random.sample(non_rel_abs, 7)
-#             sorted_random_non_rel = sorted(random_non_rel, key=lambda x: x[1][1], reverse = True)
-#             combined_list = sorted_random_rel + sorted_random_non_rel
-#             for abstract in combined_list:
-#                 candidate_pool_dict[abstract[0]] = abstract[1]
-#         else:
-#             rel = [each for each in list(sorted_dict.items())[:3]]
-#             non_rel = [each for each in list(sorted_dict.items())[3:]]
-#             random_non_rel = random.sample(non_rel, 7)
-#             sorted_random_non_rel = sorted(random_non_rel, key=lambda x: x[1][1], reverse = True)
-#             combined_list = rel + sorted_random_non_rel
-#             for abstract in combined_list:
-#                 candidate_pool_dict[abstract[0]] = abstract[1]
-#         get_candidate_pool_list.append(candidate_pool_dict)
-#         sorted_gpt_result.append(sorted_dict)
-    
-    
-#     new_data = {}
-#     for k in data.keys():
-#         new_data[k] = data[k]
-        
-#     for i, q in enumerate(new_data['Query']):
-#         new_candi = get_candidate_pool_list[i]
-#         q['candidate_pool'] = list(new_candi.keys())
-    
-#     return new_data
-
-# def create_10_candidate_dataset_sub(data, list_to_follow):
-#     smaller_dataset = create_10_candidate_dataset(data)
-
-#     new_queries = []
-
-#     for ind in list_to_follow:
-#         new_queries.append(smaller_dataset['Query'][ind])
-#     smaller_dataset['Query'] = new_queries
-
-#     return smaller_dataset
-
 def create_60_query_dataset(data):
     query_list = [1,8,10,16,23,28,33,37,44,46] + list(range(50, 100))
     
@@ -416,11 +363,6 @@ def combine_datasets(dataset1, dataset2):
         new_aspect_id2aspect[str(count)] = s
         new_aspect2aspect_id[s] = str(count)
         count += 1
-        
-#     print(len(new_aspect2aspect_id))
-#     print(len(new_aspect_id2aspect))
-#     print(len(aspect_str_list))
-#     print(new_aspect_id2aspect)
 
     dataset1_with_str = put_aspect_into_query_and_annotation(dataset1)
     dataset2_with_str = put_aspect_into_query_and_annotation(dataset2)
@@ -439,8 +381,6 @@ def combine_datasets(dataset1, dataset2):
     else:
         print("There is no Test_set")
         
-    
-    
     for q in new_dataset['Query']:
         new_aspect = {}
         new_sent2asp = {}
