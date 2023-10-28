@@ -125,7 +125,7 @@ def get_text_list(dataset):
     return query_list, query_id_list, candidate_pool_list, candidate_pool_id_list
         
 
-def rank_by_model(dataset, model_name, config, e5v3_path=None):
+def rank_by_model(dataset, model_name, config):
     '''
     Input: 
            dataset: doris mae dataset
@@ -150,7 +150,7 @@ def rank_by_model(dataset, model_name, config, e5v3_path=None):
         print(f"ranking results for {model_name} are already calculated")
         return rank
     
-    elif model_name in ["rocketqa", "tfidf", "bm25", "GPT4", "GPT3.5"]:
+    elif model_name in ["rocketqa", "tfidf", "bm25", "GPT4", "GPT3.5", "deanno"]:
         if model_name == "rocketqa":
             rank = all_ranking_result_RQA(dataset, abstract_mode, query_mode)
         elif model_name == "tfidf":
@@ -188,11 +188,7 @@ def rank_by_model(dataset, model_name, config, e5v3_path=None):
             pre_encoded_text = pre_encoded_abstract + pre_encoded_query
             
             print(f"loading model: {model_name}....")
-            if "e5v" in model_name:
-              
-                model, tokenizer = load_model(model_name, config['cuda'], e5v3_path)
-            else:
-                model, tokenizer = load_model(model_name, config['cuda'])
+            model, tokenizer = load_model(model_name, config['cuda'])
             embedding_dict = get_embedding(model_name, model, tokenizer, pre_encoded_text, config['cuda'], config['bs'])
             
             with open(f"{embedding_result_path}/{level}/embedding_{model_name}_abstract-{abstract_mode}_query-{query_mode}_{aggregation}.pickle", "wb") as f:
