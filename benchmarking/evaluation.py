@@ -17,20 +17,18 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--option', required=True, help='specify whether query option, sub-query or aspect option, format for subquery looks like subquery_k, where k is how many aspects are used, typical is 2')
     parser.add_argument('-c', '--cuda', default= "cpu", help= 'specify cuda ids to be used, format is 1,2,3, or cpu')
     parser.add_argument('-b', '--bs', default = 30, help ='user specified batch size based on their own gpu capability, default is 30, which is tested on GeForce RTX 2080 Titan')
-    parser.add_argument('-p', '--e5_path', default=None, required=False, help ='path of e5v3')
     parser.add_argument('-bt', '--bootstrap', required=True, help ='bootstrap option')
     
     args = parser.parse_args()
     option = args.option
     cuda = args.cuda.strip()
     bs = int(args.bs)
-    e5v3_path = args.e5_path
     if args.bootstrap == "True":
         bootstrap = True
     else:
         bootstrap = False
     
-    if option not in ["query", "aspect"]:
+    if option not in ["query", "aspect", "60_query", "query_candidate_150"]:
         assert "subquery" in option.split("_"), f"option format error {option}"
     
     # here are all the metrics we used, recall@5, recall@20, Recall-Precision, NDCG (normalized discounted cumulative gain), NDCG with exponential, MRR (mean recirprocal rank), MAP (mean average precsion). 
@@ -51,6 +49,17 @@ if __name__ == "__main__":
     elif option == "aspect":
         print(f"creating aspect dataset...")
         dataset = create_aspect_dataset(dataset)
+        print(f"{option} dataset size {len(dataset['Query'])}")
+        
+    elif option == "60_query":
+        print(f"creating 60 query dataset...")
+        dataset = create_60_query_dataset(dataset)
+        print(f"{option} dataset size {len(dataset['Query'])}")
+        
+    elif option == "query_candidate_150":
+        print(f"creating candidate_150 dataset...")
+        with open("dataset/DORIS_MAE_dataset_v0:5.json", "r") as f:
+            dataset = json.load(f)
         print(f"{option} dataset size {len(dataset['Query'])}")
         
     # calculate ground truth ranking for the candidate pool of each query, as provided by GPT
@@ -77,7 +86,7 @@ if __name__ == "__main__":
         query_mode = config["model_name_dict"][model_name]["query_mode"]
         abstract_mode = config["model_name_dict"][model_name]["abstract_mode"]
         aggregation = config["model_name_dict"][model_name]["aggregation"]
-        rank = rank_by_model(dataset, model_name, config, e5v3_path)
+        rank = rank_by_model(dataset, model_name, config)
         # For getting individual scores at each time
         if not bootstrap:
             for test_name in test_suites.keys():
