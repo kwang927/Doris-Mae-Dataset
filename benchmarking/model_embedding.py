@@ -59,7 +59,7 @@ def load_model(model_name, cuda =None):
         model = AutoModel.from_pretrained('intfloat/simlm-base-msmarco-finetuned')
         tokenizer = AutoTokenizer.from_pretrained('intfloat/simlm-base-msmarco-finetuned')
     elif model_name == "spladev2":
-        model = AutoModel.from_pretrained('naver/splade_v2_distil')
+        model = AutoModelForMaskedLM.from_pretrained('naver/splade_v2_distil')
         tokenizer = AutoTokenizer.from_pretrained('naver/splade_v2_distil')
     elif model_name == "scibert":
         tokenizer = AutoTokenizer.from_pretrained('allenai/scibert_scivocab_uncased')
@@ -96,8 +96,8 @@ def load_model(model_name, cuda =None):
         model = AutoModel.from_pretrained('allenai/specter2_base')
         model.load_adapter("allenai/specter2", source="hf", load_as="specter2", set_active=True)
     elif model_name == "simcse":
-        tokenizer = AutoTokenizer.from_pretrained("princeton-nlp/sup-simcse-bert-base-uncased")
-        model = AutoModel.from_pretrained("princeton-nlp/sup-simcse-bert-base-uncased")
+        tokenizer = AutoTokenizer.from_pretrained("princeton-nlp/sup-simcse-roberta-large")
+        model = AutoModel.from_pretrained("princeton-nlp/sup-simcse-roberta-large")
     elif model_name == "scibertID":
         tokenizer = AutoTokenizer.from_pretrained('allenai/scibert_scivocab_uncased')
         model = AutoModel.from_pretrained('checkpoint-91683')
@@ -249,8 +249,8 @@ def encoding(model_name, model, inputs, cuda):
             input_ids =inputs['input_ids'].to(device)
             attention_mask = inputs['attention_mask'].to(device)
             embeddings = model(input_ids, attention_mask = attention_mask)
-            output = (torch.sum(embeddings.last_hidden_state * attention_mask.unsqueeze(-1), dim=1) /\
-                                                      torch.sum(attention_mask, dim=-1, keepdim=True)).detach().cpu()
+            out = embeddings["logits"]
+            output = torch.max(torch.log(1 + torch.relu(out)) * attention_mask.unsqueeze(-1), dim=1).values.detach().cpu()
             del input_ids, attention_mask, embeddings
             torch.cuda.empty_cache()
         elif model_name == "colbertv2":
