@@ -1,7 +1,20 @@
 
-# DORIS-MAE: Scientific Document Retrieval using Multi-level Aspect-based Queries
+<div align="center">
+<h1>DORIS-MAE: Scientific Document Retrieval using Multi-level Aspect-based Queries (NeurIPS 2023)</h1>
+
+Jianyou (Andre) Wang<sup>\*</sup>&nbsp; Kaicheng Wang<sup>\*</sup>&nbsp; Xiaoyue Wang&nbsp; Prudhviraj Naidu&nbsp; Leon Bergen<sup>+</sup>&nbsp; Ramamohan Paturi<sup>+</sup>
+
+Laboratory for Emerging Intelligence (LEI)
+
+CSE Department, University of California, San Diego
+
+La Jolla, CA 92093
+
+[![NeurIPS 2023](https://img.shields.io/badge/NeurIPS-2023-purple.svg)](https://proceedings.neurips.cc/paper_files/paper/2023/hash/78f9c04bdcb06f1ada3902912d8b64ba-Abstract-Datasets_and_Benchmarks.html)&nbsp; [![arXiv](https://img.shields.io/badge/arXiv-2310.04678-<COLOR>.svg)](https://arxiv.org/abs/2310.04678)&nbsp; [![OpenReview](https://img.shields.io/badge/OpenReview-Reviews-blue.svg)](https://openreview.net/forum?id=XjaWEAyToL&referrer=%5BAuthor%20Console%5D(%2Fgroup%3Fid%3DNeurIPS.cc%2F2023%2FTrack%2FDatasets_and_Benchmarks%2FAuthors%23your-submissions))
 
 
+
+</div>
 
 ## Table of Contents
 * [Dataset](#dataset)
@@ -131,3 +144,14 @@ The code in this project is licensed under the MIT license.
 The dataset is under a CC-BY-NC license.
 
 The licenses can be found [here](https://github.com/Real-Doris-Mae/Doris-Mae-Dataset/blob/main/LICENSE.md).
+
+## Citation
+```bibtex
+@article{wang2024scientific,
+  title={Scientific document retrieval using multi-level aspect-based queries},
+  author={Wang, Jianyou Andre and Wang, Kaicheng and Wang, Xiaoyue and Naidu, Prudhviraj and Bergen, Leon and Paturi, Ramamohan},
+  journal={Advances in Neural Information Processing Systems},
+  volume={36},
+  year={2024}
+}
+```
