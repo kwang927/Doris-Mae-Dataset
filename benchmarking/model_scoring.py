@@ -14,7 +14,7 @@ from aspire.aspire_distance import find_ot_distance
 
 from other_models.bm25_scoring import all_ranking_result_bm25
 from other_models.tfidf_scoring import all_ranking_result_tfidf
-from other_models.rocketqa_scoring import all_ranking_result_RQA
+# from other_models.rocketqa_scoring import all_ranking_result_RQA
 
 
 rank_result_path = "dataset/rankings"
